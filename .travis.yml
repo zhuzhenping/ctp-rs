@@ -15,11 +15,16 @@ addons:
 
 # run builds for all the trains (and more)
 rust:
+  - nightly
+  - beta
   - stable
+  - 1.26.0
 
 # the main build
 script:
   - cargo build --verbose --manifest-path ctp-common/Cargo.toml
   - cargo test --verbose --manifest-path ctp-common/Cargo.toml
   - cargo build --verbose --manifest-path ctp-md/Cargo.toml
+  - cargo build --verbose --manifest-path ctp-md/Cargo.toml --features channel
   - cargo build --verbose --manifest-path ctp-trader/Cargo.toml
+  - cargo build --verbose --manifest-path ctp-trader/Cargo.toml --features channel

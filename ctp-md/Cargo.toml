@@ -1,10 +1,15 @@
 [package]
 name = "ctp-md"
-version = "0.5.0"
+version = "0.8.0"
 authors = ["Wangshan Lu <wisagan@gmail.com>"]
 links = "ctp-md"
-build = "build.rs"
+
+[features]
+channel = ["crossbeam-channel"]
+
+[dependencies]
+crossbeam-channel = { version = "0.3.8", optional = true }
 
 [dependencies.ctp-common]
-version = "0"
+version = "0.8.0"
 path = "../ctp-common"

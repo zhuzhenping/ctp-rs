@@ -1,3 +1,5 @@
+#[cfg(feature = "channel")]
+extern crate crossbeam_channel;
 extern crate ctp_common;
 
 use std::ffi::{ CStr, CString };
@@ -8,25 +10,48 @@ use std::sync::mpsc;
 #[allow(non_camel_case_types)]
 type c_bool = std::os::raw::c_uchar;
 
+#[cfg(feature = "channel")]
+mod channel;
+#[cfg(feature = "channel")]
+pub use channel::*;
+
 pub use ctp_common::*;
 
-#[link(name = "thostmduserapi")]
+#[allow(dead_code)]
+#[link(name = "thostmduserapi_se")]
 extern "C" {
-    fn _ZN15CThostFtdcMdApi15CreateFtdcMdApiEPKcbb(pszFlowPath: *const c_char, bIsUsingUdp: c_bool, bIsMulticast: c_bool) -> *mut c_void;
-    fn _ZN14CFtdcMdApiImpl7ReleaseEv(api: *mut c_void);
-    fn _ZN14CFtdcMdApiImpl4InitEv(api: *mut c_void);
-    fn _ZN14CFtdcMdApiImpl4JoinEv(api: *mut c_void) -> c_int;
-    fn _ZN14CFtdcMdApiImpl13GetTradingDayEv(api: *mut c_void) -> *const c_char;
-    fn _ZN14CFtdcMdApiImpl13RegisterFrontEPc(api: *mut c_void, pszFrontAddress: *const c_char);
-    fn _ZN14CFtdcMdApiImpl18RegisterNameServerEPc(api: *mut c_void, pszNsAddress: *const c_char);
-    fn _ZN14CFtdcMdApiImpl20RegisterFensUserInfoEP27CThostFtdcFensUserInfoField(api: *mut c_void, pFensUserInfo: *const CThostFtdcFensUserInfoField);
-    fn _ZN14CFtdcMdApiImpl11RegisterSpiEP15CThostFtdcMdSpi(api: *mut c_void, pSpi: *mut c_void);
-    fn _ZN14CFtdcMdApiImpl19SubscribeMarketDataEPPci(api: *mut c_void, ppInstrumentID: *const *const c_char, nCount: c_int) -> c_int;
-    fn _ZN14CFtdcMdApiImpl21UnSubscribeMarketDataEPPci(api: *mut c_void, ppInstrumentID: *const *const c_char, nCount: c_int) -> c_int;
-    fn _ZN14CFtdcMdApiImpl20SubscribeForQuoteRspEPPci(api: *mut c_void, ppInstrumentID: *const *const c_char, nCount: c_int) -> c_int;
-    fn _ZN14CFtdcMdApiImpl22UnSubscribeForQuoteRspEPPci(api: *mut c_void, ppInstrumentID: *const *const c_char, nCount: c_int) -> c_int;
-    fn _ZN14CFtdcMdApiImpl12ReqUserLoginEP27CThostFtdcReqUserLoginFieldi(api: *mut c_void, pReqUserLoginField: *const CThostFtdcReqUserLoginField, nRequestID: c_int) -> c_int;
-    fn _ZN14CFtdcMdApiImpl13ReqUserLogoutEP25CThostFtdcUserLogoutFieldi(api: *mut c_void, pUserLogoutField: *const CThostFtdcUserLogoutField, nRequestID: c_int) -> c_int;
+    #[link_name = "_ZN15CThostFtdcMdApi15CreateFtdcMdApiEPKcbb"]
+    fn CThostFtdcMdApiCreateFtdcMdApi(pszFlowPath: *const c_char, bIsUsingUdp: c_bool, bIsMulticast: c_bool) -> *mut c_void;
+    #[link_name = "_ZN15CThostFtdcMdApi13GetApiVersionEv"]
+    fn CThostFtdcMdApiGetApiVersion() -> *const c_char;
+    #[link_name = "_ZN14CFtdcMdApiImpl7ReleaseEv"]
+    fn CFtdcMdApiImplRelease(api: *mut c_void);
+    #[link_name = "_ZN14CFtdcMdApiImpl4InitEv"]
+    fn CFtdcMdApiImplInit(api: *mut c_void);
+    #[link_name = "_ZN14CFtdcMdApiImpl4JoinEv"]
+    fn CFtdcMdApiImplJoin(api: *mut c_void) -> c_int;
+    #[link_name = "_ZN14CFtdcMdApiImpl13GetTradingDayEv"]
+    fn CFtdcMdApiImplGetTradingDay(api: *mut c_void) -> *const c_char;
+    #[link_name = "_ZN14CFtdcMdApiImpl13RegisterFrontEPc"]
+    fn CFtdcMdApiImplRegisterFront(api: *mut c_void, pszFrontAddress: *const c_char);
+    #[link_name = "_ZN14CFtdcMdApiImpl18RegisterNameServerEPc"]
+    fn CFtdcMdApiImplRegisterNameServer(api: *mut c_void, pszNsAddress: *const c_char);
+    #[link_name = "_ZN14CFtdcMdApiImpl20RegisterFensUserInfoEP27CThostFtdcFensUserInfoField"]
+    fn CFtdcMdApiImplRegisterFensUserInfo(api: *mut c_void, pFensUserInfo: *const CThostFtdcFensUserInfoField);
+    #[link_name = "_ZN14CFtdcMdApiImpl11RegisterSpiEP15CThostFtdcMdSpi"]
+    fn CFtdcMdApiImplRegisterSpi(api: *mut c_void, pSpi: *mut c_void);
+    #[link_name = "_ZN14CFtdcMdApiImpl19SubscribeMarketDataEPPci"]
+    fn CFtdcMdApiImplSubscribeMarketData(api: *mut c_void, ppInstrumentID: *const *const c_char, nCount: c_int) -> c_int;
+    #[link_name = "_ZN14CFtdcMdApiImpl21UnSubscribeMarketDataEPPci"]
+    fn CFtdcMdApiImplUnSubscribeMarketData(api: *mut c_void, ppInstrumentID: *const *const c_char, nCount: c_int) -> c_int;
+    #[link_name = "_ZN14CFtdcMdApiImpl20SubscribeForQuoteRspEPPci"]
+    fn CFtdcMdApiImplSubscribeForQuoteRsp(api: *mut c_void, ppInstrumentID: *const *const c_char, nCount: c_int) -> c_int;
+    #[link_name = "_ZN14CFtdcMdApiImpl22UnSubscribeForQuoteRspEPPci"]
+    fn CFtdcMdApiImplUnSubscribeForQuoteRsp(api: *mut c_void, ppInstrumentID: *const *const c_char, nCount: c_int) -> c_int;
+    #[link_name = "_ZN14CFtdcMdApiImpl12ReqUserLoginEP27CThostFtdcReqUserLoginFieldi"]
+    fn CFtdcMdApiImplReqUserLogin(api: *mut c_void, pReqUserLoginField: *const CThostFtdcReqUserLoginField, nRequestID: c_int) -> c_int;
+    #[link_name = "_ZN14CFtdcMdApiImpl13ReqUserLogoutEP25CThostFtdcUserLogoutFieldi"]
+    fn CFtdcMdApiImplReqUserLogout(api: *mut c_void, pUserLogoutField: *const CThostFtdcUserLogoutField, nRequestID: c_int) -> c_int;
 }
 
 pub trait GenericMdApi {
@@ -46,6 +71,7 @@ pub trait GenericMdApi {
     fn req_user_logout(&mut self, req_user_logout: &CThostFtdcUserLogoutField, request_id: TThostFtdcRequestIDType) -> ApiResult;
 }
 
+#[derive(Debug)]
 pub struct MdApi {
     md_api_ptr: *mut c_void,
     registered_spi: Option<*mut CThostFtdcMdSpi>,
@@ -56,48 +82,48 @@ unsafe impl Send for MdApi {}
 impl GenericMdApi for MdApi {
     fn new(flow_path: CString, use_udp: bool, use_multicast: bool) -> Self {
         let flow_path_ptr = flow_path.into_raw();
-        let api = unsafe { _ZN15CThostFtdcMdApi15CreateFtdcMdApiEPKcbb(flow_path_ptr, use_udp as c_bool, use_multicast as c_bool) };
+        let api = unsafe { CThostFtdcMdApiCreateFtdcMdApi(flow_path_ptr, use_udp as c_bool, use_multicast as c_bool) };
         let flow_path = unsafe { CString::from_raw(flow_path_ptr) };
         drop(flow_path);
         MdApi{ md_api_ptr: api, registered_spi: None }
     }
 
     fn init(&mut self) {
-        unsafe { _ZN14CFtdcMdApiImpl4InitEv(self.md_api_ptr) };
+        unsafe { CFtdcMdApiImplInit(self.md_api_ptr) };
     }
 
     fn join(&mut self) -> ApiResult {
-        from_api_return_to_api_result(unsafe { _ZN14CFtdcMdApiImpl4JoinEv(self.md_api_ptr) })
+        from_api_return_to_api_result(unsafe { CFtdcMdApiImplJoin(self.md_api_ptr) })
     }
 
     fn get_trading_day<'a>(&mut self) -> &'a CStr {
-        let trading_day_cstr = unsafe { _ZN14CFtdcMdApiImpl13GetTradingDayEv(self.md_api_ptr) };
+        let trading_day_cstr = unsafe { CFtdcMdApiImplGetTradingDay(self.md_api_ptr) };
         unsafe { CStr::from_ptr(trading_day_cstr) }
     }
 
     fn register_front(&mut self, front_socket_address: CString) {
         let front_socket_address_ptr = front_socket_address.into_raw();
-        unsafe { _ZN14CFtdcMdApiImpl13RegisterFrontEPc(self.md_api_ptr, front_socket_address_ptr) };
+        unsafe { CFtdcMdApiImplRegisterFront(self.md_api_ptr, front_socket_address_ptr) };
         let front_socket_address = unsafe { CString::from_raw(front_socket_address_ptr) };
         drop(front_socket_address);
     }
 
     fn register_name_server(&mut self, name_server: CString) {
         let name_server_ptr = name_server.into_raw();
-        unsafe { _ZN14CFtdcMdApiImpl18RegisterNameServerEPc(self.md_api_ptr, name_server_ptr) };
+        unsafe { CFtdcMdApiImplRegisterNameServer(self.md_api_ptr, name_server_ptr) };
         let name_server = unsafe { CString::from_raw(name_server_ptr) };
         drop(name_server);
     }
 
     fn register_fens_user_info(&mut self, fens_user_info: &CThostFtdcFensUserInfoField) {
-        unsafe { _ZN14CFtdcMdApiImpl20RegisterFensUserInfoEP27CThostFtdcFensUserInfoField(self.md_api_ptr, fens_user_info) };
+        unsafe { CFtdcMdApiImplRegisterFensUserInfo(self.md_api_ptr, fens_user_info) };
     }
 
     fn register_spi(&mut self, md_spi: Box<MdSpi>) {
         let last_registered_spi_ptr = self.registered_spi.take();
         let md_spi_ptr = Box::into_raw(md_spi);
         let spi_ptr = Box::into_raw(Box::new(new_spi(md_spi_ptr)));
-        unsafe { _ZN14CFtdcMdApiImpl11RegisterSpiEP15CThostFtdcMdSpi(self.md_api_ptr, spi_ptr as *mut c_void) };
+        unsafe { CFtdcMdApiImplRegisterSpi(self.md_api_ptr, spi_ptr as *mut c_void) };
         self.registered_spi = Some(spi_ptr);
         if let Some(last_registered_spi_ptr) = last_registered_spi_ptr {
             unsafe {
@@ -110,30 +136,30 @@ impl GenericMdApi for MdApi {
 
     fn subscribe_market_data(&mut self, instrument_ids: &[CString]) -> ApiResult {
         let v = cstring_slice_to_char_star_vec(instrument_ids);
-        from_api_return_to_api_result(unsafe { _ZN14CFtdcMdApiImpl19SubscribeMarketDataEPPci(self.md_api_ptr, v.as_ptr(), v.len() as c_int) })
+        from_api_return_to_api_result(unsafe { CFtdcMdApiImplSubscribeMarketData(self.md_api_ptr, v.as_ptr(), v.len() as c_int) })
     }
 
     fn unsubscribe_market_data(&mut self, instrument_ids: &[CString]) -> ApiResult {
         let v = cstring_slice_to_char_star_vec(instrument_ids);
-        from_api_return_to_api_result(unsafe { _ZN14CFtdcMdApiImpl21UnSubscribeMarketDataEPPci(self.md_api_ptr, v.as_ptr(), v.len() as c_int) })
+        from_api_return_to_api_result(unsafe { CFtdcMdApiImplUnSubscribeMarketData(self.md_api_ptr, v.as_ptr(), v.len() as c_int) })
     }
 
     fn subscribe_for_quote_rsp(&mut self, instrument_ids: &[CString]) -> ApiResult {
         let v = cstring_slice_to_char_star_vec(instrument_ids);
-        from_api_return_to_api_result(unsafe { _ZN14CFtdcMdApiImpl20SubscribeForQuoteRspEPPci(self.md_api_ptr, v.as_ptr(), v.len() as c_int) })
+        from_api_return_to_api_result(unsafe { CFtdcMdApiImplSubscribeForQuoteRsp(self.md_api_ptr, v.as_ptr(), v.len() as c_int) })
     }
 
     fn unsubscribe_for_quote_rsp(&mut self, instrument_ids: &[CString]) -> ApiResult {
         let v = cstring_slice_to_char_star_vec(instrument_ids);
-        from_api_return_to_api_result(unsafe { _ZN14CFtdcMdApiImpl22UnSubscribeForQuoteRspEPPci(self.md_api_ptr, v.as_ptr(), v.len() as c_int) })
+        from_api_return_to_api_result(unsafe { CFtdcMdApiImplUnSubscribeForQuoteRsp(self.md_api_ptr, v.as_ptr(), v.len() as c_int) })
     }
 
     fn req_user_login(&mut self, req_user_login: &CThostFtdcReqUserLoginField, request_id: TThostFtdcRequestIDType) -> ApiResult {
-        from_api_return_to_api_result(unsafe { _ZN14CFtdcMdApiImpl12ReqUserLoginEP27CThostFtdcReqUserLoginFieldi(self.md_api_ptr, req_user_login, request_id) })
+        from_api_return_to_api_result(unsafe { CFtdcMdApiImplReqUserLogin(self.md_api_ptr, req_user_login, request_id) })
     }
 
     fn req_user_logout(&mut self, req_user_logout: &CThostFtdcUserLogoutField, request_id: TThostFtdcRequestIDType) -> ApiResult {
-        from_api_return_to_api_result(unsafe { _ZN14CFtdcMdApiImpl13ReqUserLogoutEP25CThostFtdcUserLogoutFieldi(self.md_api_ptr, req_user_logout, request_id) })
+        from_api_return_to_api_result(unsafe { CFtdcMdApiImplReqUserLogout(self.md_api_ptr, req_user_logout, request_id) })
     }
 }
 
@@ -142,13 +168,17 @@ impl Drop for MdApi {
         let last_registered_spi_ptr = self.registered_spi.take();
         if let Some(last_registered_spi_ptr) =  last_registered_spi_ptr {
             unsafe {
-                _ZN14CFtdcMdApiImpl11RegisterSpiEP15CThostFtdcMdSpi(self.md_api_ptr, ::std::ptr::null_mut::<c_void>());
+                CFtdcMdApiImplRegisterSpi(self.md_api_ptr, ::std::ptr::null_mut::<c_void>());
                 let last_registered_spi = Box::from_raw(last_registered_spi_ptr);
                 drop(last_registered_spi.md_spi_ptr);
                 drop(last_registered_spi);
             }
         };
-        unsafe { _ZN14CFtdcMdApiImpl7ReleaseEv(self.md_api_ptr) };
+        unsafe {
+            if !self.md_api_ptr.is_null() {
+                CFtdcMdApiImplRelease(self.md_api_ptr)
+            }
+        };
     }
 }
 
@@ -499,6 +529,7 @@ mod tests {
     fn create_release() {
         let flow_path = CString::new("").unwrap();
         let md_api = MdApi::new(flow_path, false, false);
+        println!("{:?}", md_api);
         drop(md_api);
         assert!(true);
     }

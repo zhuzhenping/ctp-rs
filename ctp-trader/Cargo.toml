@@ -1,10 +1,20 @@
 [package]
 name = "ctp-trader"
-version = "0.5.0"
+version = "0.8.1"
 authors = ["Wangshan Lu <wisagan@gmail.com>"]
 links = "ctp-trader"
-build = "build.rs"
+
+[features]
+channel = ["crossbeam-channel"]
+
+[dependencies]
+crossbeam-channel = { version = "0.3.8", optional = true }
 
 [dependencies.ctp-common]
-version = "0"
+version = "0.8.0"
 path = "../ctp-common"
+
+[dev-dependencies]
+simple-error = "0.2.0"
+serde = { version = "1.0.91", features = [ "derive" ] }
+serde_yaml = "0.8.9"

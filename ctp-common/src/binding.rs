@@ -19,6 +19,8 @@ impl fmt::Debug for CThostFtdcRspAuthenticateField {
             .field("BrokerID", &gb18030_cstr_to_str(&self.BrokerID))
             .field("UserID", &gb18030_cstr_to_str(&self.UserID))
             .field("UserProductInfo", &gb18030_cstr_to_str(&self.UserProductInfo))
+            .field("AppID", &gb18030_cstr_to_str(&self.AppID))
+            .field("AppType", &maybe_char(self.AppType))
             .finish()
     }
 }
@@ -65,6 +67,17 @@ impl fmt::Debug for CThostFtdcUserLogoutField {
         fmt.debug_struct("CThostFtdcUserLogoutField")
             .field("BrokerID", &gb18030_cstr_to_str(&self.BrokerID))
             .field("UserID", &gb18030_cstr_to_str(&self.UserID))
+            .finish()
+    }
+}
+
+impl fmt::Debug for CThostFtdcUserPasswordUpdateField {
+    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
+        fmt.debug_struct("CThostFtdcUserPasswordUpdateField")
+            .field("BrokerID", &gb18030_cstr_to_str(&self.BrokerID))
+            .field("UserID", &gb18030_cstr_to_str(&self.UserID))
+            .field("OldPassword", &gb18030_cstr_to_str(&self.OldPassword))
+            .field("NewPassword", &gb18030_cstr_to_str(&self.NewPassword))
             .finish()
     }
 }
